@@ -1,0 +1,61 @@
+import matplotlib.pyplot as plt
+
+# interpret instructions in text
+def parse_instruction(line):
+    parts = line.strip().split()
+    return {
+        "nota": parts[1],
+        "duracion": float(parts[3]),
+        "inicio": float(parts[5])
+    }
+
+# Data structure for visualization
+def compile_music(script_text):
+    instrucciones = script_text.strip().split('\n')
+    return [parse_instruction(line) for line in instrucciones]
+
+#matplotlib visualization
+def note_to_y(nota):
+    # note convertion to a vertical number to graph (ex: C4) 
+    notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    if len(nota) == 2:
+        name, octave = nota[0], int(nota[1])
+    else:
+        name, octave = nota[0:2], int(nota[2])
+    return octave * 12 + notas.index(name)
+
+def visualize(piano_roll):
+    fig, ax = plt.subplots()
+    for note in piano_roll:
+        y = note_to_y(note["nota"])
+        ax.broken_barh([(note["inicio"], note["duracion"])], (y - 0.4, 0.8), facecolors='tab:blue')
+        ax.text(note["inicio"] + note["duracion"]/2, y, note["nota"], ha='center', va='center', color='white')
+
+    ax.set_xlabel("Tiempo (s)")
+    ax.set_ylabel("Notas")
+    ax.grid(True)
+    plt.title("Visualización de Piano Roll")
+    plt.show()
+
+# Script musical 
+script = """
+play E4 for 1.0 at 0.0
+play E4 for 1.0 at 1.0
+play F4 for 1.0 at 2.0
+play G4 for 1.0 at 3.0
+play G4 for 1.0 at 4.0
+play F4 for 1.0 at 5.0
+play E4 for 1.0 at 6.0
+play D4 for 1.0 at 7.0
+play C4 for 1.0 at 8.0
+play C4 for 1.0 at 9.0
+play D4 for 1.0 at 10.0
+play E4 for 1.0 at 11.0
+play E4 for 1.0 at 12.0
+play D4 for 1.0 at 13.0
+play D4 for 1.0 at 14.0
+"""
+
+# Compilación y Visualización
+piano_roll = compile_music(script)
+visualize(piano_roll)
