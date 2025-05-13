@@ -1,0 +1,122 @@
+\documentclass[a0,landscape]{a0poster}
+
+\usepackage{multicol}
+\columnsep=100pt
+\columnseprule=3pt
+
+\usepackage[svgnames]{xcolor}
+\usepackage{times}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+\usepackage{wrapfig}
+\usepackage{listings}
+
+\begin{document}
+
+% HEADER
+\begin{minipage}[b]{0.79\linewidth}
+\veryHuge \color{NavyBlue} \textbf{Graphical Music Compiler} \color{Black}\\
+\Huge\textit{A Domain-Specific Language for Visual Musical Expression}\\[1cm]
+\huge \textbf{Esteban Alejandro Villalba Delgadillo, Daniel Felipe Barrera Suarez}\\
+\huge Universidad Distrital Francisco José de Caldas, Bogotá D.C.\\
+\end{minipage}
+\begin{minipage}[b]{0.19\linewidth}
+\includegraphics[width=20cm]{Escudo_UD.svg_png.png}
+\end{minipage}
+
+\vspace{1cm}
+
+\begin{multicols}{4}
+
+% ABSTRACT
+\color{Navy}
+\begin{abstract}
+This project proposes the design of a graphical-musical interpretive system that transforms structured textual instructions into visual representations of musical notation. Inspired by domain-specific language (DSL) principles, the system compiles simple commands into \textit{piano roll} diagrams and audio playback using Python libraries like \texttt{matplotlib} and \texttt{pygame}.
+\end{abstract}
+
+% BACKGROUND
+\color{SaddleBrown}
+\section*{Background}
+Domain-specific languages enable intuitive mappings between human intent and computational behavior. In music, DSLs like Sonic Pi or TidalCycles offer powerful tools, but often require steep learning curves.
+
+Our approach simplifies this by defining a minimal grammar:
+\begin{lstlisting}[language=Python]
+play C4 for 1.0 at 0.0
+play E4 for 0.5 at 1.0
+\end{lstlisting}
+
+This grammar is interpreted to generate a time-pitch grid known as a \textbf{piano roll}, widely used in DAWs (Digital Audio Workstations).
+
+% OBJECTIVES
+\color{DarkSlateGray}
+\section*{Objectives}
+\begin{itemize}
+The main objective of this project is to develop a graphical music compiler capable of interpreting simple textual instructions and converting them into a piano roll-type visual representation using Python and Pygame. It aims to facilitate the creation of visual compositions from textual commands and to explore the intersection between programming, music, and visual representation.
+
+    \item Design a symbolic interpreter for musical phrases.
+    \item Enable text-based musical input.
+    \item Visualize music using \texttt{matplotlib}.
+    \item Play notes using \texttt{pygame.mixer}.
+\end{itemize}
+
+% METHODOLOGY
+\section*{Methodology}
+\begin{itemize}
+The methodology begins with the definition of a minimal symbolic language that allows users to describe notes and their durations. For instance, inputs such as \verb|["C4-1/4", "E4-1/4", "G4-1/2"]| are parsed using a simple recursive descent parser. The interpreter, implemented in Python, uses \texttt{pygame.mixer} to play notes sequentially. Once parsing is successful, a visualization is generated using \texttt{matplotlib}, where each note is represented as a bar on a piano roll diagram. Future work includes expanding the syntax to support chords, loops, and live manipulation.
+\end{itemize}
+
+\includegraphics[width=0.9\linewidth]{Visualizacion_Piano_Roll.png}
+\centering
+\captionof{figure}{\color{Green} Example of piano roll visualization}
+\raggedright
+% SCOPE & LIMITATIONS
+\section*{Scope and Limitations}
+\textbf{Scope:}
+\begin{itemize}
+    This project focuses on rendering simple monophonic musical sequences using textual instructions. It supports basic rhythmic values such as quarter and eighth notes and operates at a fixed tempo, currently set at 120 beats per minute.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}
+     The system has several limitations due to its prototype nature. It does not support polyphonic textures or real-time interaction, and playback is restricted to .wav audio files. Additionally, the project does not generate traditional sheet music notation but instead relies solely on a piano roll-style visual representation.
+\end{itemize}
+
+\section*{Results to Expect}
+\begin{itemize}
+    \item Successfully implemented a functional parser.
+    \item Generated clear visualizations for musical patterns.
+    \item Enabled basic playback using predefined sound clips.
+\end{itemize}
+
+
+% CONCLUSIONS
+\color{SaddleBrown}
+\section*{Conclusions}
+\begin{itemize}
+    The development of the graphical music compiler demonstrates the feasibility of connecting programming and music in an accessible and educational way. Using a simple language, it interprets and visualizes basic musical instructions, promoting the learning of both computational and musical concepts. Although the system has limitations, its educational focus and expansion potential make it a valuable tool for interdisciplinary teaching.
+\end{itemize}
+
+
+
+% REFERENCES
+\begin{thebibliography}{9}
+
+\bibitem{mclean2010}
+McLean, A., \& Wiggins, G. (2010). \textit{Tidal — Pattern language for live coding of music}. Proceedings of the 7th Sound and Music Computing Conference.
+
+\bibitem{sonicpi}
+Sonic Pi. \url{https://sonic-pi.net}
+
+\bibitem{foxdot}
+FoxDot. \url{https://foxdot.org} 
+
+\bibitem{pygame}
+Pygame Documentation. \url{https://www.pygame.org/docs} 
+
+\end{thebibliography}
+
+\end{multicols}
+\end{document}
