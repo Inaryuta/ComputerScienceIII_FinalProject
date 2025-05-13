@@ -12,8 +12,8 @@
 
 - Esteban Villalba Delgadillo - 20212020064  
   eavillalbad@udistrital.edu.co  
-- Daniel Felipe Barrera Suarez  
-  correo pa
+- Daniel Felipe Barrera Suarez - 20212020097 
+  dfbarreras@udistrital.edu.co
 
 ---
 
