@@ -18,13 +18,39 @@ def compile_music(script_text):
 def note_to_y(nota):
     # note convertion to a vertical number to graph (ex: C4) 
     notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    if len(nota) == 2:
-        name, octave = nota[0], int(nota[1])
+    nombre_nota = nota[:-1]
+    octava = int(nota[-1])
+
+# Manejo de notas con sostenido o bemol (ej. C#)
+    if len(nombre_nota) > 1 and (nombre_nota.endswith('#') or nombre_nota.endswith('b')):
+        nombre_base = nombre_nota[:-1]
+        alteracion = nombre_nota[-1]
+        if alteracion == '#':
+            # Asumimos que la nota base está en la lista
+            pos_base = notas.index(nombre_base)
+            pos_final = (pos_base + 1)
+        # Se podría añadir lógica para bemoles si fuera necesario
     else:
-        name, octave = nota[0:2], int(nota[2])
-    return octave * 12 + notas.index(name)
+        pos_final = notas.index(nombre_nota)
+        
+    return octava * 12 + pos_final
+
 
 def visualize(piano_roll):
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    y_ticks = sorted(list(set([note_to_y(note["nota"]) for note in piano_roll])))
+    y_labels = []
+
+    # Crear un diccionario para mapear las posiciones a los nombres de las notas
+    pos_to_note_name = {note_to_y(note["nota"]): note["nota"] for note in piano_roll}
+    y_labels = [pos_to_note_name[y] for y in y_ticks]
+
+    for note in piano_roll:
+        y = note_to_y(note["nota"])
+        ax.broken_barh([(note["inicio"], note["duracion"])], (y - 0.4, 0.8), facecolors='cornflowerblue')
+        ax.text(note["inicio"] + note["duracion"]/2, y, note["nota"], ha='center', va='center', color='white', weight='bold')
+    
     fig, ax = plt.subplots()
     for note in piano_roll:
         y = note_to_y(note["nota"])
@@ -33,6 +59,8 @@ def visualize(piano_roll):
 
     ax.set_xlabel("Tiempo (s)")
     ax.set_ylabel("Notas")
+    ax.set_yticks(y_ticks)
+    ax.set_yticklabels(y_labels)
     ax.grid(True)
     plt.title("Visualización de Piano Roll")
     plt.show()
