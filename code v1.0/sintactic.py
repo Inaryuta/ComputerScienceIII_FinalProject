@@ -55,7 +55,7 @@ class SintacticAnalyzer:
     def number(self):
         """Parses a NUMBER token (e.g., 1, 0.5)."""
         if self.current_token and self.current_token.type_ == "NUMBER":
-            print(f"Number parsed: {self.current_token.value}")
+            # Se eliminó el print de depuración de aquí
             self.advance()
         else:
             self.error("NUMBER")

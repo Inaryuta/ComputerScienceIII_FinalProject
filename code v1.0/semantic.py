@@ -7,19 +7,20 @@ class SemanticAnalyzer:
         i = 0
 
         while i < len(self.tokens):
-            # Esperamos: play NOTE for NUMBER at NUMBER
+            # Se corrige .type a .type_ en la primera condición para mantener consistencia
             if self.tokens[i].type_ == "KEYWORD" and self.tokens[i].value == "play":
                 if i + 4 >= len(self.tokens):
                     raise Exception("Incomplete instruction after 'play'.")
-                if self.tokens[i + 1].type != "NOTE":
+                
+                if self.tokens[i + 1].type_ != "NOTE": # Se cambió .type por .type_
                     raise Exception("Expected NOTE after 'play'.")
-                if self.tokens[i + 2].type != "KEYWORD" or self.tokens[i + 2].value != "for":
+                if self.tokens[i + 2].type_ != "KEYWORD" or self.tokens[i + 2].value != "for": # Se cambió .type por .type_
                     raise Exception("Expected 'for' after NOTE.")
-                if self.tokens[i + 3].type != "NUMBER":
+                if self.tokens[i + 3].type_ != "NUMBER": # Se cambió .type por .type_
                     raise Exception("Expected NUMBER after 'for'.")
-                if self.tokens[i + 4].type != "KEYWORD" or self.tokens[i + 4].value != "at":
+                if self.tokens[i + 4].type_ != "KEYWORD" or self.tokens[i + 4].value != "at": # Se cambió .type por .type_
                     raise Exception("Expected 'at' after NUMBER.")
-                if i + 5 >= len(self.tokens) or self.tokens[i + 5].type != "NUMBER":
+                if i + 5 >= len(self.tokens) or self.tokens[i + 5].type_ != "NUMBER": # Se cambió .type por .type_
                     raise Exception("Expected NUMBER after 'at'.")
 
                 note = self.tokens[i + 1].value
@@ -29,4 +30,5 @@ class SemanticAnalyzer:
                 i += 6
             else:
                 raise Exception(f"Unexpected token: {self.tokens[i].value}")
+        
         return notes, (4, 4)  # Time signature default
