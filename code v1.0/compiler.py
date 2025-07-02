@@ -5,20 +5,59 @@ from semantic import SemanticAnalyzer
 
 def note_to_y(nota):
     """Convierte una nota musical (ej: 'C4', 'F#5') a una posición numérica en el eje Y."""
-    notas_map = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
-    nombre_nota = nota[:-1]
+    # Mapa de notas robusto que incluye bemoles como equivalentes a sostenidos
+    notas_map = {
+        'C': 0, 'B#': 0,
+        'C#': 1, 'Db': 1,
+        'D': 2,
+        'D#': 3, 'Eb': 3,
+        'E': 4, 'Fb': 4,
+        'F': 5, 'E#': 5,
+        'F#': 6, 'Gb': 6,
+        'G': 7,
+        'G#': 8, 'Ab': 8,
+        'A': 9,
+        'A#': 10, 'Bb': 10,
+        'B': 11
+    }
     octava = int(nota[-1])
+    nombre_nota = nota[:-1]
     
     posicion_nota = notas_map.get(nombre_nota)
     if posicion_nota is None:
-        # Manejo de bemoles si fuera necesario, por ahora se asumen sostenidos
-        return -1 # O manejar el error de otra forma
+        raise ValueError(f"Nota desconocida: {nota}")
         
     return octava * 12 + posicion_nota
+
+def y_to_note(y):
+    """Convierte una coordenada Y numérica de vuelta a su nombre de nota (ej: 61 -> 'C#5')."""
+    # Usamos sostenidos como la representación estándar
+    nota_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    octava = y // 12
+    indice_nota = y % 12
+    return f"{nota_names[indice_nota]}{octava}"
 
 def visualize(notes):
     """Crea y muestra una visualización de piano roll a partir de las notas procesadas."""
     fig, ax = plt.subplots(figsize=(12, 8))
+    
+    y_posiciones_tocadas = [note_to_y(n[0]) for n in notes]
+    min_y = min(y_posiciones_tocadas)
+    max_y = max(y_posiciones_tocadas)
+
+    # 2. Generar todas las notas y posiciones en ese rango
+    y_ticks_completos = list(range(min_y, max_y + 1))
+    y_labels_completos = [y_to_note(y) for y in y_ticks_completos]
+
+    # Barras de las notas
+    for nota, duracion, inicio in notes:
+        y = note_to_y(nota)
+        ax.broken_barh([(inicio, duracion)], (y - 0.4, 0.8), facecolors='cornflowerblue', edgecolor='black')
+        ax.text(inicio + duracion / 2, y, nota, ha='center', va='center', color='white', weight='bold', size=10)
+
+    # Líneas horizontales para separar cada nota en el eje
+    for y in range(min_y, max_y + 2):
+        ax.axhline(y - 0.5, color='gray', linestyle='--', linewidth=0.5)
     
     # Obtener las posiciones Y y las etiquetas de las notas únicas
     y_positions = sorted(list(set(note_to_y(n[0]) for n in notes)))
@@ -35,12 +74,15 @@ def visualize(notes):
 
     ax.set_xlabel("Tiempo (s)")
     ax.set_ylabel("Notas Musicales")
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels(y_labels)
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+    ax.set_yticks(y_ticks_completos)
+    ax.set_yticklabels(y_labels_completos)
+    ax.set_ylim(min_y - 0.5, max_y + 0.5) # Ajustar límites para que se vean bien las líneas
+
+    ax.grid(True, axis='x', linestyle=':', color='black', alpha=0.7) # Mantenemos solo la rejilla vertical
     plt.title("Visualización de Piano Roll")
     plt.tight_layout()
     plt.show()
+
 
 class Compiler:
     def compile_and_visualize(self, code: str):
@@ -85,6 +127,7 @@ if __name__ == "__main__":
     play E4 for 1.0 at 12.0
     play D4 for 1.0 at 13.0
     play D4 for 1.0 at 14.0
+    play D#4 for 2.0 at 13.0
     """
     compiler = Compiler()
     compiler.compile_and_visualize(script)
