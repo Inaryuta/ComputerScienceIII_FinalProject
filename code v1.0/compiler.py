@@ -47,14 +47,12 @@ def visualize(notes):
     y_ticks_completos = list(range(min_y, max_y + 1))
     y_labels_completos = [y_to_note(y) for y in y_ticks_completos]
 
-    # 2. Dibujar fondo negro para las notas sostenidas (teclas negras)
     for y in range(min_y, max_y + 1):
         if '#' in y_to_note(y):
             # Dibuja un rectángulo horizontal negro semitransparente
             ax.axhspan(y - 0.5, y + 0.5, facecolor='black', alpha=0.5, zorder=0)
 
 
-    # 2. Generar todas las notas y posiciones en ese rango
     y_ticks_completos = list(range(min_y, max_y + 1))
     y_labels_completos = [y_to_note(y) for y in y_ticks_completos]
 
@@ -87,6 +85,13 @@ def visualize(notes):
     ax.set_yticklabels(y_labels_completos)
     ax.set_ylim(min_y - 0.5, max_y + 0.5) # Ajustar límites para que se vean bien las líneas
 
+    for tick_label in ax.get_yticklabels():
+            if '#' in tick_label.get_text():
+                tick_label.set_color('white')
+                # Se establece un cuadro de fondo negro para la etiqueta
+                tick_label.set_bbox(dict(facecolor='black', edgecolor='none', boxstyle='round,pad=0.2'))
+
+    
     ax.grid(True, axis='x', linestyle=':', color='black', alpha=0.7) # Mantenemos solo la rejilla vertical
     plt.title("Visualización de Piano Roll")
     plt.tight_layout()
