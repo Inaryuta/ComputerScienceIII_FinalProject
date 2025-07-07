@@ -41,9 +41,18 @@ def visualize(notes):
     """Crea y muestra una visualización de piano roll a partir de las notas procesadas."""
     fig, ax = plt.subplots(figsize=(12, 8))
     
-    y_posiciones_tocadas = [note_to_y(n[0]) for n in notes]
-    min_y = min(y_posiciones_tocadas)
-    max_y = max(y_posiciones_tocadas)
+    min_y = note_to_y('C1')
+    max_y = note_to_y('B6')
+
+    y_ticks_completos = list(range(min_y, max_y + 1))
+    y_labels_completos = [y_to_note(y) for y in y_ticks_completos]
+
+    # 2. Dibujar fondo negro para las notas sostenidas (teclas negras)
+    for y in range(min_y, max_y + 1):
+        if '#' in y_to_note(y):
+            # Dibuja un rectángulo horizontal negro semitransparente
+            ax.axhspan(y - 0.5, y + 0.5, facecolor='black', alpha=0.5, zorder=0)
+
 
     # 2. Generar todas las notas y posiciones en ese rango
     y_ticks_completos = list(range(min_y, max_y + 1))
