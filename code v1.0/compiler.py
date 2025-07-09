@@ -41,8 +41,8 @@ def visualize(notes):
     """Crea y muestra una visualización de piano roll a partir de las notas procesadas."""
     fig, ax = plt.subplots(figsize=(12, 8))
     
-    min_y = note_to_y('C3')
-    max_y = note_to_y('B5')
+    min_y = note_to_y('C0')
+    max_y = note_to_y('B8')
 
     y_ticks_completos = list(range(min_y, max_y + 1))
     y_labels_completos = [y_to_note(y) for y in y_ticks_completos]
