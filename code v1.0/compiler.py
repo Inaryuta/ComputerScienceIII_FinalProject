@@ -141,7 +141,6 @@ if __name__ == "__main__":
     play E4 for 1.0 at 12.0
     play D4 for 1.0 at 13.0
     play D4 for 1.0 at 14.0
-    play D#4 for 2.0 at 13.0
     """
     compiler = Compiler()
     compiler.compile_and_visualize(script)
