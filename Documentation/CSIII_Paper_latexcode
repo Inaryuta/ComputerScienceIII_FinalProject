@@ -10,7 +10,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
-\title{\LARGE \bf An Interpreter for Musical Composition Using Mathlib and Pygame}
+\title{\LARGE \bf An Interpreter for Musical Composition Using Mathlib and Matplotlib}
 
 \author{
 \IEEEauthorblockN{Esteban Alejandro Villalba Delgadillo, Daniel Felipe Barrera Suarez}
@@ -23,12 +23,12 @@ Universidad Distrital Francisco José de Caldas, Bogotá, Colombia\\}
 
 % ------------ Abstract ------------
 \begin{abstract}
-Music composition is a domain where rules and structures often guide creativity. This paper presents the design and implementation of a domain-specific language (DSL) that interprets and compiles user-defined musical rules. The solution relies on theoretical foundations from formal languages to build a parser and interpreter, which generate mathematical representations of notes via \texttt{mathlib}, with future plans to render them graphically using \texttt{pygame}.
+Music composition is a domain where rules and structures often guide creativity. This paper presents the design and implementation of a domain-specific language (DSL) that interprets and compiles user-defined musical rules. The solution relies on theoretical foundations from formal languages to build a parser and interpreter, which generate mathematical representations of notes via \texttt{mathlib}, and visualizes them using \texttt{matplotlib}.
 \end{abstract}
 
 % ------------ Keywords ------------
 \begin{IEEEkeywords}
-Domain-specific language, formal languages, music composition, interpreter, compiler, pygame, mathlib
+Domain-specific language, formal languages, music composition, interpreter, compiler, matplotlib.
 \end{IEEEkeywords}
 
 % ------------ Introduction ------------
@@ -39,7 +39,18 @@ Domain-Specific Languages (DSLs) offer a way to model such systems. They allow u
 
 In this project, we propose the creation of a DSL designed for musical rule interpretation and composition. Drawing from the concepts explored in Workshop 1, including lexical analysis, parsing techniques, and syntactic trees, we implement a system that compiles user-defined rules into musical representations.
 
-Our system uses `mathlib` to convert rules into mathematical note objects, and `pygame` to render them graphically, offering a visual feedback mechanism. Related work in this domain includes systems such as Sonic Pi and TidalCycles, which also aim to blend programming and music, but focus on live coding and performance rather than rule-based grammar construction.
+Our system uses \texttt{mathlib} to convert rules into mathematical note objects, and \texttt{matplotlib} to render them graphically, offering a visual feedback mechanism. Related work in this domain includes systems such as Sonic Pi and TidalCycles, which also aim to blend programming and music, but focus on live coding and performance rather than rule-based grammar construction.
+
+Recent tools like Sonic Pi\cite{sonicpi}, FoxDot\cite{foxdot}, and TidalCycles~\cite{dannenberg2021music} demonstrate the educational and creative potential of code-driven music. While these tools focus on live performance, PianoDSL aims to complement them with a grammar-based system more suitable for analysis, teaching, and rule-based composition.
+
+\section{Related Work}
+
+Several systems have explored the intersection of code and music. Sonic Pi~\cite{sonicpi} is a live coding environment aimed at real-time music creation, mainly used for teaching and live performance. FoxDot~\cite{foxdot} builds on similar principles but introduces a more Pythonic syntax. TidalCycles provides a highly expressive system based on Haskell for composing music patterns.
+
+While these systems are designed for live interaction and performance, our approach focuses on rule-based grammar composition. This allows for a more structured parsing process using compiler techniques. Additionally, we aim to provide visual feedback not found in most live coding tools.
+
+Academic efforts such as those described in~\cite{brown2019dsl} and~\cite{dannenberg2021music} show the importance of accessible musical DSLs in education. Our system builds on these ideas but remains accessible to beginners, while also being grounded in formal language theory.
+
 
 % ------------ Methods and Materials ------------
 \section{Methods and Materials}
@@ -54,11 +65,34 @@ Tokens such as \texttt{NOTE}, \texttt{DURATION}, and \texttt{REPEAT} are identif
 The core of the music generation is based on `mathlib`, which handles mathematical transformations, including scaling and sequencing of note values. Each parsed rule translates into a function or transformation within `mathlib`.
 
 \subsection{Graphical Representation}
-To enhance interactivity, we plan to integrate a graphical visualization layer using \texttt{pygame}. This component is envisioned to represent notes as visual objects on a staff or piano roll, displaying pitch and duration over time.
 
-Although this feature is not yet implemented, it is central to our intended design. The graphical output will help users verify the correct interpretation of musical rules and allow for real-time feedback during composition.
+After semantic analysis, the resulting note data is passed to a visualization module implemented with \texttt{matplotlib}. This module generates a piano roll diagram, where each note is represented as a horizontal bar.
 
-Alternative implementations using \texttt{matplotlib} have been explored in early prototypes, offering static representations of the note sequence. The transition to \texttt{pygame} aims to provide a more dynamic and interactive experience.
+The horizontal position indicates the start time, and the bar’s length corresponds to the note’s duration. The vertical position reflects the note’s pitch.
+
+The visualization provides immediate feedback to users and helps validate the correctness of rule-based input. Although not interactive, it supports debugging and composition analysis.
+
+\subsection{System Architecture}
+
+Our system follows the traditional compiler pipeline, adapted to musical interpretation:
+
+\begin{itemize}
+    \item \textbf{Input Stage:} Users write musical commands in DSL format (e.g., \texttt{play C4 for 1.0 at 0.0}).
+    \item \textbf{Lexical Analysis:} The input is tokenized using regular expressions.
+    \item \textbf{Syntactic Parsing:} Tokens are checked against a context-free grammar to form a valid sequence.
+    \item \textbf{Semantic Analysis:} Valid instructions are converted into tuples: \texttt{(note, duration, start time)}.
+    \item \textbf{Mathlib Stage:} Notes are translated into mathematical representations.
+    \item \textbf{Visualization:} A piano roll or graphical feedback is generated using Matplotlib.
+\end{itemize}
+
+Figure~\ref{fig:architecture} illustrates this pipeline.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{architecture_diagram.png}
+\caption{System architecture of the musical compiler}
+\label{fig:architecture}
+\end{figure}
 
 % ------------ Results ------------
 \section{Results}
@@ -73,6 +107,8 @@ Integration tests confirmed that rules entered by users are interpreted into exp
 \subsection{Comparison}
 Although similar to Sonic Pi in purpose, our solution differs by offering a rule-based syntax rather than imperative live-coding commands. A comparison is shown in Table~\ref{tab_comparison}.
 
+The corresponding piano roll generated from this input is shown in Figure~\ref{fig:ode-to-joy}.
+
 \begin{table}[htbp]
 \caption{Comparison with Similar Music DSLs}
 \begin{center}
@@ -81,7 +117,7 @@ Although similar to Sonic Pi in purpose, our solution differs by offering a rule
 Feature & This Work & Sonic Pi \\
 \hline
 Grammar-based rules & Yes & No \\
-Visual rendering & Yes (pygame) & No \\
+Visual rendering & Yes (matplotlib) & No \\
 Math-based representation & Yes (mathlib) & No \\
 Live coding & No & Yes \\
 \hline
@@ -100,7 +136,7 @@ Live coding & No & Yes \\
 
 % ------------ Conclusions ------------
 \section{Conclusions}
-The integration of \texttt{mathlib} enables mathematical manipulation of musical notes. Although \texttt{pygame} has not yet been implemented, it is part of our future roadmap for enabling real-time visual feedback and interaction.
+The integration of \texttt{mathlib} enables mathematical manipulation of musical notes. The system already includes basic static visual output using \texttt{matplotlib}, which supports note validation and user comprehension.
 
 % ------------ Acknowledgment ------------
 \section*{Acknowledgment}
@@ -114,9 +150,6 @@ Brown, C., et al. “Designing DSLs for Education.” \textit{Proc. ACM Educator
 
 \bibitem{dannenberg2021music}
 Dannenberg, R. “Music Representation Issues, Techniques, and Systems.” \textit{Computer Music Journal}, 2021.
-
-\bibitem{pygame}
-Pygame Documentation. Available: \url{https://www.pygame.org/docs}
 
 \bibitem{sonicpi}
 Sonic Pi. Available: \url{https://sonic-pi.net}

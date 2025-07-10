@@ -7,11 +7,15 @@
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{amsmath}
+\usepackage{changepage}
+\usepackage{float}
 
-\title{Technical Report: Graphical Music Compiler}
+\title{PianoDSL: A Graphical Domain-Specific Language for Musical Visualization}
 \author{
-    \IEEEauthorblockN{Esteban Alejandro Villalba Delgadillo, Daniel Felipe Barrera Suarez} \\
-    \IEEEauthorblockA{Universidad Distrital Francisco Jose de Caldas, Bogotá, Colombia}
+    \IEEEauthorblockN{Esteban Alejandro Villalba Delgadillo, Daniel Felipe Barrera Suárez} \\
+    \IEEEauthorblockA{Department of Computer Engineering \\
+    Universidad Distrital Francisco José de Caldas, Bogotá, Colombia \\
+    \texttt{\{evillalbad, dbarreras\}@udistrital.edu.co}}
 }
 
 \begin{document}
@@ -19,7 +23,7 @@
 \maketitle
 
 \begin{abstract}
-This project presents the design of a graphical-musical interpretive system that transforms structured textual instructions into visual representations of musical notation. Inspired by the domain-specific language (DSL) paradigm, our approach implements a processing pipeline that parses commands such as \texttt{play [note] for [duration] at [time]}, builds an intermediate piano roll representation, and generates visualizations using \texttt{matplotlib}. We detail the basic grammar, the internal data model, and the note-to-graph mapping, establishing the foundation for future extensions including real-time sound synthesis via \texttt{pygame}.
+This report presents PianoDSL, a domain-specific language (DSL) designed for music composition and visualization. It interprets simple text-based musical instructions into piano roll graphics using a compiler written in Python. The methodology integrates lexical, syntactic, and semantic analyzers, and the output is a time-pitch diagram representing note duration and placement. The project demonstrates how compiler concepts can be applied in educational tools for computational music.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -44,79 +48,175 @@ Languages such as Sonic Pi~\cite{sonicpi}, FoxDot~\cite{foxdot}, and TidalCycles
 Additionally, libraries like Pygame allow sound playback in a straightforward way, making it feasible to combine symbolic notation, sound reproduction, and graphical visualization in educational environments.
 
 \section{Background}
-The initial interpreter will use lists of instructions to trigger sounds using \texttt{pygame.mixer} or similar libraries.
-
-This project is grounded in theoretical principles studied in Workshop 1 of the course, specifically finite automata, regular expressions, and context-free grammars. These concepts inform the design of the language's lexical and syntactic structure. The interpreter's ability to model rules for notes, durations, and repetitions stems directly from grammar modeling and derivation trees explored in class. Thus, the workshop provided the core foundation for building a functional and parsable DSL.
+This project is grounded in theoretical principles studied in Workshop 1 of the course, specifically finite automata, regular expressions, and context-free grammars. These concepts inform the design of the language's lexical and syntactic structure. The interpreter's ability to model rules for notes, durations, and repetitions stems directly from grammar modeling and derivation trees explored in class.
 
 \section{Objectives}
 \begin{itemize}
-    \item Design a symbolic interpreter for musical phrases.
-    \item Create a textual interface to interpret these phrases.
-    \item Implement a sound execution prototype.
-    \item Establish the foundation for real-time visualization.
+    \item Design and implement a symbolic interpreter for musical phrases.
+    \item Enable textual instructions to be converted into piano roll graphics.
+    \item Apply core compiler concepts (lexing, parsing, semantics) to a creative domain.
+    \item Provide a foundation for future sound synthesis and interaction.
 \end{itemize}
 
 \section{Scope}
-Prototype limitations:
-
 \begin{itemize}
-    \item Only simple musical notes.
-    \item Basic durations (quarter, eighth notes).
-    \item Sequential execution.
-    \item Textual or \textit{piano roll} visual representation (no traditional scores).
+    \item Supports single-line, monophonic musical notation.
+    \item Input based on duration and starting time.
+    \item No graphical score or tempo customization.
+    \item Visualization only, no audio output in current version.
 \end{itemize}
 
 \section{Assumptions}
 \begin{itemize}
-    \item User has basic programming knowledge.
-    \item Note format: \texttt{C4}, \texttt{D\#5}.
-    \item Fixed tempo (e.g., 120 BPM).
-    \item No concurrency or parallel execution.
+    \item Notes are formatted as \texttt{[A-G][#|b]?[0-8]}.
+    \item Durations and start times are positive real numbers.
+    \item Input is well-formed and follows DSL syntax.
 \end{itemize}
 
 \section{Limitations}
 \begin{itemize}
-    \item No live editing or real-time execution.
-    \item Monophonic playback.
-    \item Sound quality limited to .wav files or basic tones.
-    \item No MIDI export or graphical score generation at this stage.
+    \item No concurrency or polyphony.
+    \item No tempo, volume, or instrument changes.
+    \item Visualization limited to a piano roll, not staff notation.
 \end{itemize}
 
 \section{Methodology}
-The methodology begins with the definition of a minimal symbolic language that allows users to describe notes and their durations. For instance, inputs such as \texttt{["C4-1/4", "E4-1/4", "G4-1/2"]} are parsed using a simple recursive descent parser. The interpreter, implemented in Python, uses \texttt{pygame.mixer} to play notes sequentially.
+The system is composed of three main components based on classical compiler architecture:
 
-Once parsing is successful, a visualization is generated using \texttt{matplotlib}, where each note is represented as a bar on a piano roll diagram. Future work includes expanding the syntax to support chords, loops, and live manipulation.
+\subsection{Lexical Analysis}
+The lexical analyzer is responsible for scanning the input string and dividing it into a list of meaningful symbols (tokens). We use Python's \texttt{re} module to define regular expressions for each token type:
 
-\section{Glossary}
 \begin{itemize}
-    \item \textbf{BPM}: Beats Per Minute, measures the musical tempo.
-    \item \textbf{Pygame}: Python library for multimedia development.
-    \item \textbf{Musical Syntax}: Textual representation of notes and durations.
+    \item \texttt{KEYWORD}: \verb|\b(play|for|at)\b|
+    \item \texttt{NOTE}: \verb|[A-G](#|b)?[0-8]|
+    \item \texttt{NUMBER}: \verb|\d+(\.\d+)?|
+    \item \texttt{SKIP} and \texttt{NEWLINE} tokens are ignored.
+\end{itemize}
+
+This phase produces a flat list of tokens that can be passed to the parser.
+
+\subsection{Syntactic Analysis}
+The parser verifies that the token sequence matches the grammar rules of PianoDSL. It uses a recursive descent strategy to validate the following grammar:
+
+\textbf{Grammar Definition (BNF)}:
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.48\textwidth]{grammar.png}
+\caption{Context-free grammar for PianoDSL}
+\label{fig:grammar}
+\end{figure}
+
+
+If the syntax does not match, meaningful error messages are generated to help the user correct their input.
+
+\subsection{Semantic Analysis}
+The semantic analyzer processes the validated tokens to extract meaningful musical data. Each instruction is transformed into a tuple \texttt{(note, duration, time)}. This structured data is used by the visualizer to render the final piano roll. The semantic phase also handles validation of values (e.g., ensuring durations are positive).
+
+\subsection{Visualization}
+Once semantic data is extracted, the system uses \texttt{matplotlib} to create a piano roll. Each note is displayed as a horizontal bar positioned by its pitch and start time, with length proportional to its duration.
+
+\section{System Architecture}
+The system follows a classic compiler pipeline adapted for musical instructions. Figure~\ref{fig:architecture} illustrates the process:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{architecture_diagram.png}
+\caption{System architecture of the PianoDSL compiler}
+\label{fig:architecture}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Input:} textual DSL code describing notes.
+    \item \textbf{Lexical Analyzer:} splits input into tokens.
+    \item \textbf{Syntactic Analyzer:} validates token structure using grammar rules.
+    \item \textbf{Semantic Analyzer:} extracts musical data tuples.
+    \item \textbf{Visualizer:} renders a piano roll from the musical data.
+\end{itemize}
+
+
+\section{Results}
+The following program was used as input:
+
+\begin{lstlisting}
+play E4 for 1.0 at 0.0
+play F4 for 1.0 at 1.0
+play G4 for 1.0 at 2.0
+play F4 for 1.0 at 3.0
+play E4 for 1.0 at 4.0
+\end{lstlisting}
+
+The output was a piano roll diagram where each note appears horizontally with length proportional to its duration.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{pianoroll_example.png}
+\caption{Sample piano roll visualization generated by the compiler}
+\end{figure}
+
+\section{Testing and Validation}
+The compiler was tested using both valid and invalid input scripts.
+
+\subsection{Valid Input}
+Correctly structured scripts produced expected tokens, passed all grammar rules, and generated piano rolls without errors.
+
+\subsection{Invalid Input}
+We intentionally introduced errors (e.g., missing \texttt{for}, wrong note like \texttt{H9}) to verify error detection. The compiler returned meaningful exceptions that helped in debugging.
+
+\subsection{Token Verification}
+Sample input:
+\begin{lstlisting}
+play D#4 for 1.5 at 6.0
+\end{lstlisting}
+
+Generated tokens:
+\begin{itemize}
+    \item \texttt{KEYWORD(play)}
+    \item \texttt{NOTE(D\#4)}
+    \item \texttt{KEYWORD(for)}
+    \item \texttt{NUMBER(1.5)}
+    \item \texttt{KEYWORD(at)}
+    \item \texttt{NUMBER(6.0)}
+\end{itemize}
+
+\section{Discussion}
+PianoDSL simplifies how users interact with music and programming. The consistent format promotes predictability, while the graphical output reinforces musical structure. Though basic, the interpreter demonstrates compiler theory applied in a creative and accessible context.
+
+\section{Conclusion}
+The project successfully integrates lexical analysis, parsing, and visualization into a unified tool. PianoDSL proves that a pedagogical compiler project can go beyond simple math or shapes and tap into musical creativity.
+
+\section{Folder Structure and Execution}
+The project is composed of the following Python modules:
+
+\begin{itemize}
+    \item \texttt{lexical.py}: Handles token recognition.
+    \item \texttt{sintactic.py}: Validates syntax using grammar rules.
+    \item \texttt{semantic.py}: Extracts note data from tokens.
+    \item \texttt{compiler.py}: Integrates all components and generates the visualization.
+\end{itemize}
+
+To execute the project:
+\begin{lstlisting}[language=bash]
+python compiler.py
+\end{lstlisting}
+
+\section{Future Work}
+Planned improvements include:
+
+\begin{itemize}
+    \item Integrating real-time sound playback using \texttt{pygame}.
+    \item Supporting polyphony and chords.
+    \item Adding loop instructions and tempo control.
+    \item Exporting results to MIDI or MusicXML.
+    \item Enhancing the interface with live editing capabilities.
 \end{itemize}
 
 \section*{Acknowledgements}
-We thank the course team for their guidance in technical design and the academic institution that encourages projects combining music and technology.
-
-\section*{Appendix (Future Work)}
-The appendix will include syntax examples, code snippets, and the folder structure of the project. It will be added once implementation progresses further.
-
-\bibliographystyle{IEEEtran}
+We thank Eng. Carlos Sierra and the course team for their support, as well as the Universidad Distrital for encouraging interdisciplinary exploration.
 
 \begin{thebibliography}{1}
-\bibitem{sonicpi}
-Sonic Pi. \url{https://sonic-pi.net}
-
-\bibitem{foxdot}
-FoxDot. \url{https://foxdot.org}
-
-\bibitem{brown2019dsl}
-Brown, C. et al. “Designing DSLs for Education”, \textit{Proc. ACM Educators Workshop}, 2019.
-
-\bibitem{dannenberg2021music}
-Dannenberg, R. “Music Representation Issues, Techniques, and Systems”, \textit{Computer Music Journal}, 2021.
-
-\bibitem{pygame}
-Pygame Documentation, \url{https://www.pygame.org/docs}
+\bibitem{sonicpi} Sonic Pi. \url{https://sonic-pi.net}
+\bibitem{foxdot} FoxDot. \url{https://foxdot.org}
+\bibitem{pygame} Pygame Documentation. \url{https://www.pygame.org/docs}
 \end{thebibliography}
 
 \end{document}
